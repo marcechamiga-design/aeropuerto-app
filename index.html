@@ -1,0 +1,513 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mi Primer Vuelo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout concept: a boarding-pass header with a perforated progress stub, then a sticky tab bar
+   (Salida, Llegada, Escala, Miedos, Frases) over single-column step cards that open and check off. */
+:root {
+  --bg: #EDF0F5;
+  --surface: #FFFFFF;
+  --ink: #13233F;
+  --ink-2: #4A5A74;
+  --line: #D3DAE5;
+  --hero-bg: #13233F;
+  --hero-ink: #F1F4F9;
+  --hero-ink-2: #AEBBD0;
+  --gold: #C89B1D;
+  --gold-text: #7F6008;
+  --gold-soft: #F6EBC3;
+  --ok: #1B7A52;
+  --ok-soft: #DDF1E7;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1528;
+    --surface: #132240;
+    --ink: #E8EDF6;
+    --ink-2: #A2B0C7;
+    --line: #25365A;
+    --hero-bg: #172A4D;
+    --hero-ink: #F1F4F9;
+    --hero-ink-2: #AEBBD0;
+    --gold: #E3BB4F;
+    --gold-text: #E3BB4F;
+    --gold-soft: #3A3115;
+    --ok: #4CC38A;
+    --ok-soft: #143A2B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1528;
+  --surface: #132240;
+  --ink: #E8EDF6;
+  --ink-2: #A2B0C7;
+  --line: #25365A;
+  --hero-bg: #172A4D;
+  --hero-ink: #F1F4F9;
+  --hero-ink-2: #AEBBD0;
+  --gold: #E3BB4F;
+  --gold-text: #E3BB4F;
+  --gold-soft: #3A3115;
+  --ok: #4CC38A;
+  --ok-soft: #143A2B;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+
+/* Boarding-pass header */
+.pass { background: var(--hero-bg); color: var(--hero-ink); border-radius: 18px; position: relative; overflow: hidden; }
+.pass-top { padding: 22px 22px 20px; display: grid; gap: 10px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+.pass h1 { font-size: clamp(2rem, 8vw, 2.9rem); line-height: 1.02; font-weight: 700; letter-spacing: -.01em; }
+.pass-top p { color: var(--hero-ink-2); max-width: 46ch; }
+.route { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-family: var(--font-mono); font-size: 13px; color: var(--hero-ink); }
+.route b { font-weight: 500; font-size: 22px; letter-spacing: .08em; }
+.route .line { flex: 1 1 40px; min-width: 40px; border-top: 2px dotted var(--hero-ink-2); }
+.perf { position: relative; border-top: 2px dashed var(--hero-ink-2); margin: 0 18px; opacity: .7; }
+.perf::before, .perf::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); }
+.perf::before { left: -30px; }
+.perf::after { right: -30px; }
+.pass-stub { padding: 18px 22px 22px; display: grid; gap: 10px; }
+.stub-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.stub-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--hero-ink-2); }
+.stub-count { font-family: var(--font-display); font-weight: 700; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.bar { height: 10px; border-radius: 99px; background: rgba(255,255,255,.16); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--gold); border-radius: 99px; transition: width .35s ease; }
+.reset { justify-self: start; background: transparent; border: 1px solid var(--hero-ink-2); color: var(--hero-ink); border-radius: 99px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.reset[data-armed="true"] { border-color: var(--gold); color: var(--gold); }
+
+/* Tabs */
+.tabs-wrap { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); margin: 14px -4px 0; padding: 8px 4px; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: 0 0 auto; background: transparent; border: 1px solid var(--line); color: var(--ink-2); border-radius: 99px; padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 15px; }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* Panels */
+.panel { display: grid; gap: 12px; padding-top: 10px; }
+.panel-head { display: grid; gap: 6px; padding: 6px 2px 4px; }
+.panel-head h2 { font-size: 1.55rem; font-weight: 700; }
+.panel-head p { color: var(--ink-2); max-width: 60ch; }
+.count-line { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-text); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.card.done { border-color: var(--ok); }
+.card-head { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; text-align: left; background: none; border: 0; padding: 14px 16px; cursor: pointer; }
+.tag { grid-column: 1; font-family: var(--font-mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); }
+.card.done .tag { color: var(--ok); }
+.card-title { grid-column: 1; font-family: var(--font-display); font-weight: 600; font-size: 1.2rem; line-height: 1.2; }
+.chev { grid-column: 2; grid-row: 1 / span 2; width: 22px; height: 22px; border-right: 2.5px solid var(--ink-2); border-bottom: 2.5px solid var(--ink-2); transform: rotate(45deg) scale(.55); transition: transform .2s ease; }
+.card-head[aria-expanded="true"] .chev { transform: rotate(225deg) scale(.55); }
+.card-body { padding: 0 16px 16px; display: grid; gap: 12px; border-top: 1px solid var(--line); padding-top: 14px; }
+.card-body h4 { font-size: .8rem; font-family: var(--font-mono); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.card-body ul { margin: 0; padding-left: 1.15rem; display: grid; gap: 6px; }
+.card-body li::marker { color: var(--gold); }
+.what { max-width: 62ch; }
+.tip { background: var(--gold-soft); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; }
+.tip b { font-family: var(--font-mono); font-weight: 500; font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); }
+
+.check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 500; min-height: 44px; }
+.check input { width: 22px; height: 22px; accent-color: var(--ok); flex: 0 0 auto; margin: 0; cursor: pointer; }
+.checks { display: grid; gap: 2px; }
+.card-foot { border-top: 1px dashed var(--line); padding-top: 4px; }
+
+/* Phrases */
+.phrase { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center; }
+.phrase .en { font-family: var(--font-display); font-weight: 600; font-size: 1.08rem; min-width: 0; overflow-wrap: anywhere; }
+.phrase .es { grid-column: 1; color: var(--ink-2); font-size: .95rem; min-width: 0; }
+.copy { grid-column: 2; grid-row: 1 / span 2; background: transparent; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; font-size: 13px; cursor: pointer; color: var(--ink-2); }
+.gloss { display: grid; gap: 8px; margin: 0; }
+.gloss div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 2px; }
+.gloss dt { font-family: var(--font-display); font-weight: 600; }
+.gloss dd { margin: 0; color: var(--ink-2); font-size: .95rem; }
+.sub { font-size: 1.2rem; font-weight: 700; padding-top: 10px; }
+
+.foot { margin-top: 26px; color: var(--ink-2); font-size: 13.5px; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
+.foot b { color: var(--ink); font-family: var(--font-display); }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar > i, .chev { transition: none; }
+}
+</style>
+
+<div class="wrap">
+  <header class="pass">
+    <div class="pass-top">
+      <span class="eyebrow">Viajes en Foco · Guía del viajero</span>
+      <h1>Mi primer vuelo</h1>
+      <p>Cada trámite del aeropuerto, desde la puerta de tu casa hasta que pisas el destino. Marca lo que vas haciendo y no te pierdas nada.</p>
+      <div class="route" aria-hidden="true"><b>EZE</b><span class="line"></span><span>tu escala</span><span class="line"></span><b>···</b></div>
+    </div>
+    <div class="perf" aria-hidden="true"></div>
+    <div class="pass-stub">
+      <div class="stub-row"><span class="stub-label">Tu avance</span><span class="stub-count" id="overallCount" aria-live="polite">0 de 0</span></div>
+      <div class="bar" role="progressbar" aria-label="Avance total" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="overallBar"><i id="overallFill"></i></div>
+      <button class="reset" id="reset" type="button">Empezar de nuevo</button>
+    </div>
+  </header>
+
+  <div class="tabs-wrap">
+    <div class="tabs" role="tablist" aria-label="Secciones de la guía" id="tabs"></div>
+  </div>
+
+  <main id="panel" class="panel" role="tabpanel" tabindex="-1"></main>
+
+  <footer class="foot">
+    <p><b>Guía orientativa.</b> Los requisitos cambian según el país, la aerolínea y el aeropuerto. Antes de viajar, confirma documentos, visas, equipaje y reglas de seguridad con tu aerolínea y con las autoridades de tu destino.</p>
+    <p>Hecha por Viajes en Foco para quienes vuelan por primera vez.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var TABS = [
+    { id: "salida", label: "Salida" },
+    { id: "llegada", label: "Llegada" },
+    { id: "escala", label: "Escala" },
+    { id: "miedos", label: "Miedos" },
+    { id: "frases", label: "Frases" }
+  ];
+
+  var PRE = {
+    id: "pre", tag: "En casa", title: "Antes de salir de casa",
+    what: "Revisa todo esto la noche anterior. Es lo que más tranquilidad da el día del vuelo.",
+    note: "Verifica la documentación requerida según tu destino: visa o autorización electrónica, vacunas y formularios de ingreso. Confírmala en el sitio oficial del país o con tu agencia antes de viajar.",
+    items: [
+      { id: "p1", text: "Pasaporte vigente (muchos destinos piden al menos 6 meses de vigencia)" },
+      { id: "p2", text: "Visa o autorización electrónica: verifica si tu destino la exige" },
+      { id: "p3", text: "Pasaje o reserva, descargado en el celular y también impreso" },
+      { id: "p4", text: "Seguro de viaje con su número de asistencia anotado" },
+      { id: "p5", text: "Reserva de alojamiento con la dirección completa" },
+      { id: "p6", text: "Si viajas con menores, la documentación que pida cada país" },
+      { id: "p7", text: "Celular cargado, cargador y adaptador de enchufe" },
+      { id: "p8", text: "Tarjeta y algo de efectivo" },
+      { id: "p9", text: "Medicación personal en el equipaje de mano, con receta" }
+    ]
+  };
+
+  var SALIDA = [
+    { id: "s1", tag: "Paso 1 · Aeropuerto", title: "Llega con margen",
+      what: "En vuelos internacionales se recomienda llegar unas 3 horas antes de la salida. Ezeiza tiene varias terminales: confirma en tu reserva cuál usa tu aerolínea.",
+      todo: ["Busca las pantallas de Salidas (Departures) y ubica tu vuelo.", "Encuentra el mostrador de tu aerolínea.", "Si algo no se entiende, pregunta al personal uniformado o en un mostrador de informes."],
+      tip: "Aparecer temprano es el mejor remedio para los nervios. Si sobra tiempo, lo usas para tomar algo con calma." },
+    { id: "s1b", tag: "Si hiciste compras", title: "Devolución de impuestos (Tax Free)",
+      what: "Si compraste productos con formulario Tax Free, puedes recuperar parte de los impuestos al salir del país o de la región. Cada país y cada tienda tiene sus reglas: los mínimos de compra, los plazos y el porcentaje que se devuelve cambian.",
+      todo: ["En la tienda: pide el formulario Tax Free al pagar, con tu pasaporte. Revisa que tenga tus datos y el importe con el impuesto desglosado, y que lleve adjunta la factura original.", "Antes del check-in: si vas a despachar las compras en la valija, ve primero a la ventanilla de aduana para sellar el formulario. Lleva los productos contigo, sin usar, para mostrarlos si te lo piden. Recién después despachas la valija.", "Si las compras van solo en el equipaje de mano: haz el check-in, pasa seguridad y migraciones, y sella el formulario en aduana después.", "Si tienes una conexión: en Europa el sello se hace en el último aeropuerto de la Unión Europea antes de salir de la región.", "Lleva a la aduana: formulario Tax Free, facturas originales, pasaporte, tarjeta de embarque y los productos.", "Con el formulario sellado, cobra el reembolso según indique tu comprobante: en la ventanilla de la empresa (por ejemplo Global Blue o Planet) o dejando el formulario en su buzón. Saca una foto del formulario antes de entregarlo.", "En Europa, los productos tienen que salir de la Unión Europea dentro de los 3 meses de la compra."],
+      tip: "Antes de empacar una compra en la valija, pregunta si necesita sello. Si ya la despachaste, no vas a poder mostrar los productos. Hay países, como el Reino Unido, donde el Tax Free para turistas ya no existe. Confirma las reglas en la tienda y en la empresa del reembolso." },
+    { id: "s2", tag: "Paso 2 · Mostrador", title: "Check-in y despacho de equipaje",
+      what: "Presentas tu pasaporte, la aerolínea verifica tu reserva y te entrega la tarjeta de embarque. La valija se pesa, se etiqueta y se despacha.",
+      todo: ["Entrega la valija grande en el mostrador. Guarda el comprobante de equipaje que te dan.", "Revisa en la tarjeta: tu nombre igual al del pasaporte, destino, número de vuelo, asiento y hora de embarque.", "Si la puerta dice \"por confirmar\", la verás en las pantallas más adelante."],
+      tip: "Pesa tu valija en casa. El límite de peso está en tu pasaje y pasarse suele costar dinero." },
+    { id: "s3", tag: "Paso 3 · Migraciones", title: "Control de pasaportes",
+      what: "Antes de entrar a la zona de embarque hay un control de migraciones. Presentas tu pasaporte y tu tarjeta de embarque.",
+      todo: ["Ten ambos documentos en la mano mientras haces la fila.", "El oficial suele hacer pocas preguntas o ninguna.", "Cuando te devuelva los documentos, guárdalos enseguida en un lugar fijo."],
+      tip: "Elige un solo bolsillo para el pasaporte y la tarjeta de embarque, y no cambies más." },
+    { id: "s4", tag: "Paso 4 · Seguridad", title: "Control de seguridad",
+      what: "Tu equipaje de mano pasa por rayos X y tú pasas por un detector. Las reglas pueden variar según el aeropuerto.",
+      todo: ["Saca la computadora y la tablet de la mochila.", "Los líquidos van en una bolsa transparente (muchos aeropuertos limitan a 100 ml por envase).", "Quítate cinturón, objetos de metal y campera si te lo piden.", "Lleva una botella vacía y llénala después del control."],
+      tip: "Prepara todo mientras haces la fila, así llegas al control sin apuros." },
+    { id: "s5", tag: "Paso 5 · Embarque", title: "Sala de espera y puerta",
+      what: "Del otro lado hay tiendas, baños y comida. Lo importante es saber cuál es tu puerta (Gate) y a qué hora se embarca.",
+      todo: ["Mira las pantallas: tu vuelo, hora y puerta.", "Vuelve a mirarlas cada tanto: las puertas pueden cambiar.", "Activa las notificaciones de la app de tu aerolínea.", "Ve hacia tu puerta con tiempo. El embarque se cierra antes del despegue."],
+      tip: "Antes de comprar o sentarte a comer, ubica tu puerta. Así sabes cuánto tarda llegar." },
+    { id: "s6", tag: "Paso 6 · Puerta", title: "Embarque",
+      what: "Llaman por grupos o zonas. Muestras tu tarjeta de embarque (y a veces el pasaporte) y entras al avión.",
+      todo: ["Busca el número y la letra de tu asiento.", "Guarda el equipaje de mano en el compartimento de arriba o bajo el asiento de adelante.", "Deja a mano lo que vas a usar: auriculares, abrigo, documentos del destino."],
+      tip: "Si no encuentras tu asiento, pídele ayuda a la tripulación. Ese es justo su trabajo." },
+    { id: "s7", tag: "Paso 7 · A bordo", title: "Durante el vuelo",
+      what: "El despegue y el aterrizaje son los momentos más intensos. Después el viaje suele ser tranquilo.",
+      todo: ["Atiende las instrucciones de la tripulación en todo momento.", "Cinturón abrochado en el despegue, el aterrizaje y cuando se encienda la señal.", "Si te entregan formularios de migración o aduana, complétalos con tu birome y los datos de tu alojamiento.", "Camina un poco y toma agua en vuelos largos.", "Disfruta tu vuelo con las películas, la música y el resto del entretenimiento que ofrece el avión."],
+      tip: "Lleva siempre una birome en el equipaje de mano. Es lo que más piden en el avión y menos se tiene." }
+  ];
+
+  var LLEGADA = [
+    { id: "l1", tag: "Paso 1 · Al aterrizar", title: "Baja y sigue los carteles",
+      what: "Al bajar, los carteles te llevan en la misma dirección que a todos los pasajeros. Busca Llegadas (Arrivals) y Migraciones (Immigration).",
+      todo: ["Sigue a la mayoría de la gente y a los carteles.", "Si tienes una conexión, busca Connections, Transfer o Transit, y mira la escala.", "Pon el celular en la hora local si no lo hizo solo."],
+      tip: "Si viajas en grupo, quédate cerca de tu coordinador hasta que cada uno pase migraciones." },
+    { id: "l2", tag: "Paso 2 · Migraciones", title: "Control de entrada",
+      what: "Presentas el pasaporte, el formulario (si lo pide el país) y la visa o autorización. En algunos países toman huellas y una foto.",
+      todo: ["Las preguntas más comunes: motivo del viaje, cuánto tiempo te quedas, dónde te alojas y si tienes pasaje de regreso.", "Responde corto y con la verdad.", "Ten a mano la reserva del alojamiento y el pasaje de salida."],
+      tip: "Si no entiendes algo, dilo con calma: \"Could you repeat that, please?\". Es completamente normal." },
+    { id: "l3", tag: "Paso 3 · Equipaje", title: "Retira tu valija",
+      what: "Las pantallas de Baggage claim indican en qué cinta sale el equipaje de tu vuelo, según el número de vuelo.",
+      todo: ["Busca la cinta de tu vuelo y espera tu valija.", "Compara la etiqueta con tu comprobante de equipaje.", "Si no aparece o llegó dañada, sigue con el paso siguiente: el formulario PIR, antes de salir del aeropuerto."],
+      tip: "Ponle a tu valija algo distintivo, como una cinta de color. La reconoces a metros." },
+    { id: "l3b", tag: "Si tu valija no aparece", title: "Formulario PIR: reporte de equipaje",
+      what: "Si pasó un buen rato y tu valija no salió en la cinta, o llegó dañada, no te vayas del aeropuerto sin hacer el reporte. El formulario se llama PIR (Property Irregularity Report) y es el comprobante de que avisaste a la aerolínea.",
+      todo: ["Antes de salir de la zona de equipaje, ve al mostrador de equipaje extraviado (Lost & Found o Baggage Services) de tu aerolínea. Suele estar cerca de las cintas.", "Lleva tu pasaporte, la tarjeta de embarque y el comprobante de equipaje, que es la etiqueta que te pegaron al despachar.", "Describe tu valija: color, marca, tamaño y algo que la distinga. Una foto en el celular ayuda mucho.", "Deja la dirección de tu alojamiento y un teléfono o correo donde te puedan ubicar.", "Pide una copia del PIR y anota el número de referencia del caso. Con ese número puedes consultar el estado en el sitio de la aerolínea.", "Guarda los recibos de lo esencial que tengas que comprar mientras esperas, como ropa o artículos de higiene. Pregunta a la aerolínea qué gastos reconoce y hasta qué monto.", "Si tienes seguro de viaje con cobertura de equipaje, avísale y presenta lo que te pidan."],
+      tip: "Haz el reporte siempre en el aeropuerto de llegada, antes de salir. Los reclamos por escrito suelen tener plazos cortos: alrededor de 7 días si la valija llegó dañada y de 21 días desde que la recibes si se demoró. Confirma los plazos con tu aerolínea." },
+    { id: "l4", tag: "Paso 4 · Aduana", title: "Declara lo que corresponda",
+      what: "En la aduana se controla lo que entra al país. Muchos países restringen alimentos, plantas y productos de origen animal, y piden declarar efectivo sobre cierto monto.",
+      todo: ["Lee los carteles de qué declarar o completa el formulario si lo piden.", "Si llevas comida, medicamentos o efectivo, revisa las reglas del país antes de viajar."],
+      tip: "Ante la duda, declara. Es mucho más simple que explicar algo después." },
+    { id: "l5", tag: "Paso 5 · Salida", title: "Llega a tu alojamiento",
+      what: "En la zona de llegadas encuentras cambio de dinero, chips o eSIM, y transporte.",
+      todo: ["Compra o activa tu chip o eSIM si lo necesitas.", "Usa transporte oficial: taxis habilitados, tren o apps conocidas.", "Desconfía de quienes te ofrecen traslados dentro de la terminal.", "Ten la dirección del alojamiento guardada y capturada en el celular."],
+      tip: "Avísale a alguien que ya aterrizaste y estás en camino." }
+  ];
+
+  var ESCALA = [
+    { id: "e1", tag: "Antes de volar", title: "Prepara tu conexión",
+      what: "Una escala es un punto intermedio entre dos vuelos. Se resuelve mejor con un par de preguntas en el check-in.",
+      todo: ["Pregunta si tu valija va hasta el destino final.", "Revisa si tu escala exige visa de tránsito.", "Mira el tiempo entre vuelos. Si es muy poco, consulta cuál es el mínimo recomendado."],
+      tip: "Con una conexión ajustada, pide un asiento adelante para bajar rápido." },
+    { id: "e2", tag: "Al aterrizar", title: "Sigue Connections o Transfer",
+      what: "Busca los carteles Connections, Transfer o Transit. Normalmente no necesitas salir del aeropuerto.",
+      todo: ["Mira las pantallas para ubicar la puerta del siguiente vuelo.", "Si cambia de terminal, sigue los carteles de traslado.", "En algunas escalas hay otro control de seguridad."],
+      tip: "Aunque tengas tiempo, ve primero a tu puerta y después recorre el aeropuerto." },
+    { id: "e3", tag: "Si algo sale mal", title: "Si pierdes la conexión",
+      what: "Pasa, y tiene solución. Cuando los dos vuelos están en la misma reserva, la aerolínea suele reubicarte.",
+      todo: ["Ve de inmediato a un mostrador de la aerolínea o de reubicación.", "Lleva tu pasaporte y todas las tarjetas de embarque.", "Pregunta por tu equipaje y por alojamiento si te toca esperar."],
+      tip: "Si los vuelos son de reservas separadas, la situación cambia. Pregunta con tranquilidad qué opciones tienes." },
+    { id: "e4", tag: "Escala larga", title: "Salir del aeropuerto durante la escala",
+      what: "En una escala larga puede dar ganas de conocer la ciudad, pero hay que pasar por migraciones y volver a tiempo.",
+      todo: ["Confirma si necesitas visa para salir del aeropuerto.", "Pregunta dónde dejar el equipaje si no es el tuyo de mano.", "Vuelve con mucho margen para repetir el check-in y los controles."],
+      tip: "Si dudas, quédate en el aeropuerto. Muchos tienen salas de descanso y duchas." }
+  ];
+
+  var MIEDOS = [
+    { q: "¿Y si pierdo el vuelo?", a: "Ve enseguida al mostrador de tu aerolínea: cuanto antes, más opciones. Por eso conviene llegar con margen. Si tienes seguro de viaje, revisa qué cubre." },
+    { q: "¿Y si no hablo inglés?", a: "El aeropuerto está lleno de pictogramas y pantallas bilingües. Usa la pestaña Frases, un traductor en el celular y pídele ayuda al personal. Se entienden con señas y paciencia." },
+    { q: "¿Y si me pierdo?", a: "Mira los carteles con dibujos de avión, valija y puerta. Pregunta en un mostrador de informes o a alguien uniformado. Si viajas en grupo, avisa a tu coordinador." },
+    { q: "¿Y si me hacen preguntas en migraciones?", a: "Son pocas y siempre las mismas: a qué vienes, cuánto tiempo te quedas y dónde te alojas. Responde con calma, con frases cortas y con la verdad." },
+    { q: "¿Y si no llega mi valija?", a: "Pasa poco, y hay un procedimiento: completas el formulario PIR en el mostrador de equipaje de la aerolínea antes de salir y, cuando aparece, te la llevan al alojamiento (lo explicamos en Llegada). Por eso lleva en la mano lo esencial: documentos, medicación, un cambio de ropa y el cargador." },
+    { q: "¿Y si no entiendo los anuncios?", a: "Casi todo aparece también en pantallas y en la app de la aerolínea. Si un anuncio te preocupa, pregunta a otro pasajero o al personal de la puerta." },
+  ];
+
+  var FRASES = [
+    ["Where is the check-in desk for [airline]?", "¿Dónde está el mostrador de check-in de [aerolínea]?"],
+    ["Which gate is my flight?", "¿Cuál es la puerta de mi vuelo?"],
+    ["Excuse me, I'm lost. Can you help me?", "Disculpe, estoy perdido/a. ¿Me puede ayudar?"],
+    ["I'm here for tourism.", "Vengo por turismo."],
+    ["I'm staying for [number] days.", "Me quedo [número] días."],
+    ["I'm staying at [hotel name].", "Me alojo en [nombre del hotel]."],
+    ["I'm traveling with a group.", "Viajo con un grupo."],
+    ["Could you repeat that, please?", "¿Podría repetirlo, por favor?"],
+    ["I don't speak English very well.", "No hablo bien inglés."],
+    ["Where is the baggage claim?", "¿Dónde se retira el equipaje?"],
+    ["My luggage didn't arrive.", "Mi valija no llegó."],
+    ["I missed my connection. What can I do?", "Perdí mi conexión. ¿Qué puedo hacer?"],
+    ["Where can I find a taxi?", "¿Dónde encuentro un taxi?"]
+  ];
+
+  var GLOSARIO = [
+    ["Check-in", "Registro del pasajero. Se hace en el mostrador o por internet, y de ahí sale la tarjeta de embarque."],
+    ["Boarding pass", "Tarjeta de embarque. Dice tu vuelo, asiento, puerta y hora."],
+    ["Gate", "Puerta de embarque, desde donde se sube al avión."],
+    ["Layover o conexión", "Escala entre dos vuelos."],
+    ["Immigration", "Control de migraciones, donde se revisa tu pasaporte."],
+    ["Customs", "Aduana, donde se controla lo que entra al país."],
+    ["Baggage claim", "Zona donde se retira el equipaje al llegar."],
+    ["Carry-on", "Equipaje de mano, el que llevas contigo a bordo."],
+    ["Delayed", "Demorado. El vuelo sale más tarde de lo previsto."],
+    ["Boarding", "Embarcando. Ya se puede subir al avión."]
+  ];
+
+  var GROUPS = {
+    salida: PRE.items.map(function (i) { return i.id; }).concat(SALIDA.map(function (s) { return s.id; })),
+    llegada: LLEGADA.map(function (s) { return s.id; }),
+    escala: ESCALA.map(function (s) { return s.id; })
+  };
+  var ALL = GROUPS.salida.concat(GROUPS.llegada, GROUPS.escala);
+
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem("mpv-checks") || "{}") || {}; } catch (e) { state = {}; }
+  function save() { try { localStorage.setItem("mpv-checks", JSON.stringify(state)); } catch (e) {} }
+
+  var panel = document.getElementById("panel");
+  var tabsEl = document.getElementById("tabs");
+  var current = "salida";
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function checkbox(id, text) {
+    return '<label class="check"><input type="checkbox" data-id="' + id + '"' + (state[id] ? " checked" : "") + '> <span>' + esc(text) + '</span></label>';
+  }
+
+  function cardHTML(opts, open) {
+    var ids = opts.ids ? opts.ids.join(",") : "";
+    var body = "";
+    if (opts.items) {
+      body += '<p class="what">' + esc(opts.what) + '</p><div class="checks">' + opts.items.map(function (i) { return checkbox(i.id, i.text); }).join("") + "</div>" + (opts.note ? '<p class="tip"><b>Importante</b><span>' + esc(opts.note) + "</span></p>" : "");
+    } else {
+      body += '<p class="what">' + esc(opts.what) + "</p>";
+      if (opts.todo) body += "<h4>Qué hacer</h4><ul>" + opts.todo.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>";
+      if (opts.tip) body += '<p class="tip"><b>Tip</b><span>' + esc(opts.tip) + "</span></p>";
+      if (opts.id) body += '<div class="card-foot">' + checkbox(opts.id, "Ya lo hice") + "</div>";
+    }
+    return '<article class="card" data-ids="' + ids + '">' +
+      '<button class="card-head" type="button" aria-expanded="' + (open ? "true" : "false") + '">' +
+      '<span class="tag">' + esc(opts.tag) + '</span><span class="card-title">' + esc(opts.title) + '</span><span class="chev" aria-hidden="true"></span></button>' +
+      '<div class="card-body"' + (open ? "" : " hidden") + ">" + body + "</div></article>";
+  }
+
+  function head(title, text, groupId) {
+    return '<div class="panel-head"><h2>' + esc(title) + "</h2><p>" + esc(text) + "</p>" +
+      (groupId ? '<span class="count-line" id="count-' + groupId + '"></span>' : "") + "</div>";
+  }
+
+  function render() {
+    var html = "";
+    if (current === "salida") {
+      html += head("Salida", "Todo lo que pasa desde que sales de tu casa hasta que te sientas en el avión.", "salida");
+      html += cardHTML({ id: null, ids: PRE.items.map(function (i) { return i.id; }), tag: PRE.tag, title: PRE.title, what: PRE.what, note: PRE.note, items: PRE.items }, true);
+      html += SALIDA.map(function (s) { s.ids = [s.id]; return cardHTML(s, false); }).join("");
+    } else if (current === "llegada") {
+      html += head("Llegada", "Del avión a la puerta del aeropuerto, paso a paso.", "llegada");
+      html += LLEGADA.map(function (s, i) { s.ids = [s.id]; return cardHTML(s, i === 0); }).join("");
+    } else if (current === "escala") {
+      html += head("Escala", "Si tu viaje tiene una conexión, esto es lo que conviene saber.", "escala");
+      html += ESCALA.map(function (s, i) { s.ids = [s.id]; return cardHTML(s, i === 0); }).join("");
+    } else if (current === "miedos") {
+      html += head("Miedos comunes", "Lo que más preocupa a quienes vuelan por primera vez, con una respuesta tranquila.", null);
+      html += MIEDOS.map(function (m, i) {
+        return '<article class="card"><button class="card-head" type="button" aria-expanded="' + (i === 0 ? "true" : "false") + '"><span class="tag">Pregunta</span><span class="card-title">' + esc(m.q) + '</span><span class="chev" aria-hidden="true"></span></button><div class="card-body"' + (i === 0 ? "" : " hidden") + '><p class="what">' + esc(m.a) + "</p></div></article>";
+      }).join("");
+    } else {
+      html += head("Frases útiles", "Lo básico en inglés para el aeropuerto. Toca Copiar para llevarlas al traductor o mostrarlas.", null);
+      html += FRASES.map(function (f) {
+        return '<div class="phrase"><span class="en">' + esc(f[0]) + '</span><span class="es">' + esc(f[1]) + '</span><button class="copy" type="button">Copiar</button></div>';
+      }).join("");
+      html += '<h3 class="sub">Glosario</h3><dl class="gloss">' + GLOSARIO.map(function (g) { return "<div><dt>" + esc(g[0]) + "</dt><dd>" + esc(g[1]) + "</dd></div>"; }).join("") + "</dl>";
+    }
+    panel.innerHTML = html;
+    var cards = panel.querySelectorAll(".card[data-ids]");
+    for (var i = 0; i < cards.length; i++) refreshCard(cards[i]);
+    updateProgress();
+  }
+
+  function refreshCard(card) {
+    var ids = (card.getAttribute("data-ids") || "").split(",").filter(Boolean);
+    var done = ids.length > 0 && ids.every(function (id) { return state[id]; });
+    card.classList.toggle("done", done);
+  }
+
+  function countIn(ids) { return ids.filter(function (id) { return state[id]; }).length; }
+
+  function updateProgress() {
+    var done = countIn(ALL), total = ALL.length;
+    document.getElementById("overallCount").textContent = done + " de " + total;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    document.getElementById("overallFill").style.width = pct + "%";
+    document.getElementById("overallBar").setAttribute("aria-valuenow", String(pct));
+    var line = document.getElementById("count-" + current);
+    var gids = GROUPS[current];
+    if (line && gids) line.textContent = countIn(gids) + " de " + gids.length + " listos";
+  }
+
+  function buildTabs() {
+    tabsEl.innerHTML = TABS.map(function (t) {
+      return '<button class="tab" type="button" role="tab" id="tab-' + t.id + '" data-tab="' + t.id + '" aria-selected="' + (t.id === current ? "true" : "false") + '">' + t.label + "</button>";
+    }).join("");
+  }
+
+  function setTab(id, updateHash) {
+    current = id;
+    var tabs = tabsEl.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) tabs[i].setAttribute("aria-selected", tabs[i].getAttribute("data-tab") === id ? "true" : "false");
+    panel.setAttribute("aria-labelledby", "tab-" + id);
+    render();
+    if (updateHash) { try { history.replaceState(null, "", "#" + id); } catch (e) {} }
+  }
+
+  tabsEl.addEventListener("click", function (e) {
+    var b = e.target.closest(".tab");
+    if (b) setTab(b.getAttribute("data-tab"), true);
+  });
+
+  panel.addEventListener("click", function (e) {
+    var h = e.target.closest(".card-head");
+    if (h) {
+      var open = h.getAttribute("aria-expanded") === "true";
+      h.setAttribute("aria-expanded", open ? "false" : "true");
+      h.nextElementSibling.hidden = open;
+      return;
+    }
+    var c = e.target.closest(".copy");
+    if (c) copyPhrase(c);
+  });
+
+  panel.addEventListener("change", function (e) {
+    var input = e.target;
+    if (!input.matches('input[type="checkbox"][data-id]')) return;
+    state[input.getAttribute("data-id")] = input.checked ? 1 : 0;
+    if (!input.checked) delete state[input.getAttribute("data-id")];
+    save();
+    refreshCard(input.closest(".card"));
+    updateProgress();
+  });
+
+  function flash(btn, text) {
+    var old = btn.textContent;
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = old; }, 1600);
+  }
+
+  function copyPhrase(btn) {
+    var el = btn.closest(".phrase").querySelector(".en");
+    var text = el.textContent;
+    function fallback() {
+      try {
+        var r = document.createRange();
+        r.selectNodeContents(el);
+        var s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+      } catch (err) {}
+      flash(btn, "Selecciónala");
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { flash(btn, "Copiada"); }, fallback);
+    } catch (err) { fallback(); }
+  }
+
+  var resetBtn = document.getElementById("reset");
+  var resetTimer = null;
+  resetBtn.addEventListener("click", function () {
+    if (resetBtn.getAttribute("data-armed") === "true") {
+      state = {};
+      save();
+      resetBtn.setAttribute("data-armed", "false");
+      resetBtn.textContent = "Empezar de nuevo";
+      clearTimeout(resetTimer);
+      render();
+    } else {
+      resetBtn.setAttribute("data-armed", "true");
+      resetBtn.textContent = "Toca otra vez para borrar tu avance";
+      resetTimer = setTimeout(function () {
+        resetBtn.setAttribute("data-armed", "false");
+        resetBtn.textContent = "Empezar de nuevo";
+      }, 4000);
+    }
+  });
+
+  var initial = (location.hash || "").replace("#", "");
+  if (TABS.some(function (t) { return t.id === initial; })) current = initial;
+  buildTabs();
+  setTab(current, false);
+})();
+</script>
+
+</body></html>
